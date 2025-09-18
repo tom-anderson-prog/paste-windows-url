@@ -4,7 +4,7 @@
   "description": "paste the windows path as a linux-style path",
   "version": "0.0.1",
   "engines": {
-    "vscode": "^1.104.0"
+    "vscode": "^1.74.0"
   },
   "categories": [
     "Other"
@@ -14,10 +14,16 @@
   "contributes": {
     "commands": [
       {
-        "command": "paste-windows-url.helloWorld",
-        "title": "Hello World"
+        "command": "paste-windows-url.paste",
+        "title": "Paste as Linux Path"
       }
-    ]
+    ],
+    "keybindings": {
+      "command": "paste-windows-url.paste",
+      "key": "ctrl+v",
+      "mac": "cmd+v",
+      "when": "editorTextFocus"
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run package",

@@ -2,19 +2,31 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 
-function convertPath(text: string): string {
-	let newPath = text.replace(/\\/g, "/");
+// to check if a string is likely a windows file path
+function isWindowsPath(text: string): boolean {
+	// windows path must contain a driver letter
+	const hasDriverLetter = /^[a-zA-Z]:\\/.test(text);
 
-	return newPath;
+	// must contain more than just one backslash to distinguish from simple escape characters
+	const hasMultiBackslashes = (text.match(/\\/g) || []).length > 1;
+
+	// must not contain common code escape sequences
+	const isCodeSnippet = text.includes("\\n") || text.includes("\\t") || text.includes(`\\"`) || text.includes(`\\'`);
+
+	return hasDriverLetter && hasMultiBackslashes && !isCodeSnippet
+}
+
+
+// function to convert a windows path to a linux-style path
+function convertPath(text: string): string {
+	// replace all backslashes with forward slashes
+	return text.replace(/\\/g, "/");
 }
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
-
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "paste-windows-url" is now active!');
+	// console.log('Congratulations, your extension "paste-windows-url" is now active!');
 
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
@@ -26,14 +38,20 @@ export function activate(context: vscode.ExtensionContext) {
 			return;
 		}
 
+		// get content from clipboard
 		const clipboardText = await vscode.env.clipboard.readText();
 
-		const convertedPath = convertPath(clipboardText);
+		const isPath = isWindowsPath(clipboardText);
 
-		editor.edit(editBuilder => {
-			const position = editor.selection.active;
-			editBuilder.insert(position, convertedPath);
-		});
+		if (isPath) {
+			const convertedPath = convertPath(clipboardText);
+			editor.edit(editBuilder => {
+				const position = editor.selection.active;
+				editBuilder.insert(position, convertedPath);
+			});
+		} else {
+			vscode.commands.executeCommand("editor.action.clipboardPasteAction");
+		}
 	});
 
 	context.subscriptions.push(disposable);

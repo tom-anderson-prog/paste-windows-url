@@ -3,6 +3,7 @@
   "displayName": "paste windows url",
   "description": "paste the windows path as a linux-style path",
   "version": "0.0.1",
+  "publisher": "andersontom",
   "engines": {
     "vscode": "^1.104.0"
   },

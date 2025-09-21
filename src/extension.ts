@@ -4,18 +4,9 @@ import * as vscode from 'vscode';
 
 // to check if a string is likely a windows file path
 function isWindowsPath(text: string): boolean {
-	// windows path must contain a driver letter
-	const hasDriverLetter = /^[a-zA-Z]:\\/.test(text);
-
-	// must contain more than just one backslash to distinguish from simple escape characters
-	const hasMultiBackslashes = (text.match(/\\/g) || []).length > 1;
-
-	// must not contain common code escape sequences
-	const isCodeSnippet = text.includes("\\n") || text.includes("\\t") || text.includes(`\\"`) || text.includes(`\\'`);
-
-	return hasDriverLetter && hasMultiBackslashes && !isCodeSnippet
+	const windowsPathRegex = /^[a-z]:\\(?:[^\\/:*?"<>|\r\n]+\\)*[^\\/:*?"<>|\r\n]*$/i;
+    return windowsPathRegex.test(text);
 }
-
 
 // function to convert a windows path to a linux-style path
 function convertPath(text: string): string {
@@ -26,14 +17,15 @@ function convertPath(text: string): string {
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
-	// console.log('Congratulations, your extension "paste-windows-url" is now active!');
+	console.log('Congratulations, your extension "windows-to-linux-path" is now active!');
 
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
-	const disposable = vscode.commands.registerCommand('paste-windows-url.paste', async () => {
+	const disposable = vscode.commands.registerCommand('windows-to-linux-path.paste', async () => {
 
 		const editor = vscode.window.activeTextEditor;
+		console.log('heihei',editor);
 		if (!editor) {
 			return;
 		}
@@ -42,6 +34,8 @@ export function activate(context: vscode.ExtensionContext) {
 		const clipboardText = await vscode.env.clipboard.readText();
 
 		const isPath = isWindowsPath(clipboardText);
+
+		console.log('2', clipboardText, isPath);
 
 		if (isPath) {
 			const convertedPath = convertPath(clipboardText);
